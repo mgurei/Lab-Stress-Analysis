@@ -4,6 +4,7 @@
 % stage for each subject (see paper on Acute Stress by Tanev et all)
 
 %% Load Data
+clear all; close all; clc;
 load 's_ecg_10_subjects.mat';
 
 %% Declare relevant data for ECG signals
@@ -26,16 +27,34 @@ names={'sub1_29_05_2013'; 'sub2_29_05_2013'; 'sub3_29_05_2013';
         'sub7_30_05_2013'; 'sub8_30_05_2013'; 'sub9_31_05_2013';
         'sub10_31_05_2013'};
 fs=512; % Sampling frequency
-
 %% Part 1: Detect QRS
 % Example of QRS detection 
 load s_b_coeff.mat; % See desc_filt variable for filter parameters
 load s_ecg_10_subjects.mat;
-ecg=ecg_data(1,~isnan(ecg_data(1,:)));  
-qrs=s_detect_qrs(ecg,b_low,b_high,b_avg,delay);
-figure;
-plot(1:length(qrs),5000*qrs,1:length(ecg),ecg);
-title('ECG with detected QRS')
+subject_no = 1;
+ecg=ecg_data(1,~isnan(ecg_data(subject_no,:)));
+
+% Division of ecg in 5 segments
+segment{1} = ecg(1:startPoint(subject_no,1))';
+segment{2} = ecg(startPoint(subject_no,1)+1:startPoint(subject_no,2))';
+segment{3} = ecg(startPoint(subject_no,2)+1:startPoint(subject_no,3))';
+segment{4} = ecg(startPoint(subject_no,3)+1:startPoint(subject_no,4))';
+segment{5} = ecg(startPoint(subject_no,4)+1:end)';
+
+% Detection of QRS segments and plotting
+figure();
+for i = 1:5
+    qrs{i} = s_detect_qrs(segment{i}, b_low, b_high, b_avg, delay);
+    subplot(5,1,i);
+    plot(length(qrs{i}), qrs{i});
+end
+
+
+
+% qrs=s_detect_qrs(ecg,b_low,b_high,b_avg,delay);
+% figure;
+% plot(1:length(qrs),5000*qrs,1:length(ecg),ecg);
+% title('ECG with detected QRS')
 
 % TASK: SEGMENT ECG APPROPRIATELY AND FIND QRS FOR EACH INDIVIDUAL SEGMENT
 % ECG SHOULD BE SEGMENTED ACCORDING TO THE EXPERIMENTAL STAGES

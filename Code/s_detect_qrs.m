@@ -49,8 +49,8 @@ function [qrs]=s_detect_qrs(ecg,b_low,b_high,b_avg,delay)
     
     % Average
     ecg_6=filter(b_avg,1,ecg_5);
-    plot(ecg_6);
-    title('Final stage of filtering in QRS Detection');
+%     plot(ecg_6);
+%     title('Final stage of filtering in QRS Detection');
     %% Detection
     qrs_loc=zeros(length(ecg),1);
     
