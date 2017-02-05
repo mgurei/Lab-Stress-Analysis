@@ -42,12 +42,13 @@ segment{4} = ecg(startPoint(subject_no,3)+1:startPoint(subject_no,4))';
 segment{5} = ecg(startPoint(subject_no,4)+1:end)';
 
 % Detection of QRS segments and plotting
-figure();
+
 for i = 1:5
     qrs{i} = s_detect_qrs(segment{i}, b_low, b_high, b_avg, delay);
-    subplot(5,1,i);
-    plot(length(qrs{i}), qrs{i});
+    figure(i);
+    plot (1:length(qrs{i}),5000*qrs{i}, 1:length(segment{i}), segment{i});
 end
+
 
 
 
