@@ -1,8 +1,8 @@
 %-----------------------Loading ECG Data----------------------------------%
 % Version: Student
-%-- This file loads the ECG data and the starting points of every
+% This file loads the ECG data and the starting points of every
 % stage for each subject (see paper on Acute Stress by Tanev et all)
-close all
+close all; clear all; clc;
 %% Load Data
 load 's_ecg_10_subjects.mat';
 
@@ -44,11 +44,9 @@ for i = 1:5
     qrs{i} = s_detect_filtering(Segment{i},qrs{i});
 end
 
-
 figure;
 plot(1:length(qrs{1}),5000*qrs{1},1:length(Segment{1}),Segment{1});
 
- 
 % line([startPoint(1,1),startPoint(1,1)],[0,5000],'LineWidth',1,'Color','Green');
 % line([startPoint(1,2),startPoint(1,2)],[0,5000],'LineWidth',1,'Color','Green');
 % line([startPoint(1,3),startPoint(1,3)],[0,5000],'LineWidth',1,'Color','Green');
@@ -59,39 +57,50 @@ plot(1:length(qrs{1}),5000*qrs{1},1:length(Segment{1}),Segment{1});
 % % TASK: SEGMENT ECG APPROPRIATELY AND FIND QRS FOR EACH INDIVIDUAL SEGMENT
 % % ECG SHOULD BE SEGMENTED ACCORDING TO THE EXPERIMENTAL STAGES
 % 
-% %% Part 2: Calculating HRV
-% % Example of computing HRV
-% f_resample=8;
-% 
-% % TASK: FOR EACH SEGMENT OF THE QRS DETECTED SEGMENTS CALCULATE THE HRV 
-% % TACHOGRAM AND RESAMPLE IT EVENLY TO 8 Hz 
-% % (make changes in s_get_HRV use the interp1 function to interpolate the HRV)
-% 
-% % This version of the s_get_HRV online returns correct values for HRV and
-% % qrs_loc_time. You need to make appropriate changes to reutrn HRV_resample and
-% % qrs_loc_time_resample.
-% [HRV, qrs_loc_time, HRV_resample, qrs_loc_time_resample]=s_get_HRV(qrs, f_resample, fs);
-% 
-% figure;
-% plot(qrs_loc_time(2:end),HRV);
-% title('HRV tachogram');
-% xlabel('Time of RR (seconds)')
-% xlabel('RR interval (seconds)');
-% 
-% % THIS FOURIER TRANSFORM WILL ONLY WORK WHEN THE APPROPRIATE CHANGES WERE
-% % MADE TO THE s_get_HRV function FOR THE HRV_resample and
-% % qrs_loc_time_resample
-% 
-% % temp=HRV_resample(~isnan(HRV_resample));
-% % HRV_psd=abs((fftshift(fft(temp)).^2)/length(temp)); %PSD (s^2/Hz) estimation
-% % freq_axis=-f_resample/2:f_resample/(length(HRV_psd)):...
-% %         (f_resample/2-f_resample/(length(HRV_psd)));
-% % figure;
-% % plot(freq_axis,HRV_psd);
-% % xlabel('Frequency (Hz)'); ylabel('PSD (s^2/Hz)');
-% % axis([0,0.4,0,20]);
-% 
-% %% Part 3: Extracting HRV Parameters
+%% Part 2: Calculating HRV
+% Example of computing HRV
+f_resample=8;
+
+% TASK: FOR EACH SEGMENT OF THE QRS DETECTED SEGMENTS CALCULATE THE HRV 
+% TACHOGRAM AND RESAMPLE IT EVENLY TO 8 Hz 
+% (make changes in s_get_HRV use the interp1 function to interpolate the HRV)
+
+% This version of the s_get_HRV online returns correct values for HRV and
+% qrs_loc_time. You need to make appropriate changes to reutrn HRV_resample and
+% qrs_loc_time_resample.
+
+% HRV and HRV resampled calculation
+[HRV, qrs_loc_time, HRV_resample, qrs_loc_time_resample]=s_get_HRV(qrs{1}, f_resample, fs);
+
+% Plotting HRV
+figure;
+plot(qrs_loc_time(2:end), HRV);
+title('HRV tachogram');
+xlabel('Time of RR (seconds)')
+xlabel('RR interval (seconds)');
+
+% Plotting HRV resampled
+figure;
+plot(qrs_loc_time_resample, HRV_resample);
+title('HRV resampled tachogram');
+xlabel('Time of RR (seconds)')
+xlabel('RR interval (seconds)');
+
+% THIS FOURIER TRANSFORM WILL ONLY WORK WHEN THE APPROPRIATE CHANGES WERE
+% MADE TO THE s_get_HRV function FOR THE HRV_resample and
+% qrs_loc_time_resample
+
+temp=HRV_resample(~isnan(HRV_resample));
+HRV_psd=abs((fftshift(fft(temp)).^2)/length(temp)); %PSD (s^2/Hz) estimation
+freq_axis=-f_resample/2:f_resample/(length(HRV_psd)):...
+        (f_resample/2-f_resample/(length(HRV_psd)));
+figure;
+plot(freq_axis,HRV_psd);
+xlabel('Frequency (Hz)'); ylabel('PSD (s^2/Hz)');
+axis([0,0.4,0,20]);
+
+
+%% Part 3: Extracting HRV Parameters
 % 
 % % TASK: EXTRACT PARAMETERS FOR EACH OF THE HRV SEGMENTS (FOR EACH
 % % EXPERIMENTAL STAGE). TIME DOMAIN, FREQUENCY DOMAIN AND NON-LINEAR 
