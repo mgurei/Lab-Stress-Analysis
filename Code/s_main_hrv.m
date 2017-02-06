@@ -2,9 +2,8 @@
 % Version: Student
 %-- This file loads the ECG data and the starting points of every
 % stage for each subject (see paper on Acute Stress by Tanev et all)
-
+close all
 %% Load Data
-clear all; close all; clc;
 load 's_ecg_10_subjects.mat';
 
 %% Declare relevant data for ECG signals
@@ -27,91 +26,100 @@ names={'sub1_29_05_2013'; 'sub2_29_05_2013'; 'sub3_29_05_2013';
         'sub7_30_05_2013'; 'sub8_30_05_2013'; 'sub9_31_05_2013';
         'sub10_31_05_2013'};
 fs=512; % Sampling frequency
+
 %% Part 1: Detect QRS
 % Example of QRS detection 
 load s_b_coeff.mat; % See desc_filt variable for filter parameters
 load s_ecg_10_subjects.mat;
-subject_no = 1;
-ecg=ecg_data(1,~isnan(ecg_data(subject_no,:)));
+ecg=ecg_data(1,~isnan(ecg_data(1,:)));
 
-% Division of ecg in 5 segments
-segment{1} = ecg(1:startPoint(subject_no,1))';
-segment{2} = ecg(startPoint(subject_no,1)+1:startPoint(subject_no,2))';
-segment{3} = ecg(startPoint(subject_no,2)+1:startPoint(subject_no,3))';
-segment{4} = ecg(startPoint(subject_no,3)+1:startPoint(subject_no,4))';
-segment{5} = ecg(startPoint(subject_no,4)+1:end)';
+Segment{1} = ecg(1:startPoint(1,1));
+Segment{2} = ecg(startPoint(1,1)+1:startPoint(1,2));
+Segment{3} = ecg(startPoint(1,2)+1:startPoint(1,3));
+Segment{4} = ecg(startPoint(1,3)+1:startPoint(1,4));
+Segment{5} = ecg(startPoint(1,4)+1:length(ecg));
 
-% Detection of QRS segments and plotting
 for i = 1:5
-    qrs{i} = s_detect_qrs(segment{i}, b_low, b_high, b_avg, delay);
-    figure(i);
-    plot (1:length(qrs{i}),5000*qrs{i}, 1:length(segment{i}), segment{i});
+    qrs{i}=s_detect_qrs(Segment{i},b_low,b_high,b_avg,delay);
 end
 
-tot_qrs=s_detect_qrs(ecg,b_low,b_high,b_avg,delay);
 figure;
-plot(1:length(tot_qrs),5000*tot_qrs,1:length(ecg),ecg);
-title('ECG with detected QRS')
+plot(1:length(qrs{1}),5000*qrs{1},1:length(Segment{1}),Segment{1});
 
-% TASK: SEGMENT ECG APPROPRIATELY AND FIND QRS FOR EACH INDIVIDUAL SEGMENT
-% ECG SHOULD BE SEGMENTED ACCORDING TO THE EXPERIMENTAL STAGES
 
-%% Part 2: Calculating HRV
-% Example of computing HRV
-f_resample=8;
-
-% TASK: FOR EACH SEGMENT OF THE QRS DETECTED SEGMENTS CALCULATE THE HRV 
-% TACHOGRAM AND RESAMPLE IT EVENLY TO 8 Hz 
-% (make changes in s_get_HRV use the interp1 function to interpolate the HRV)
-
-% This version of the s_get_HRV online returns correct values for HRV and
-% qrs_loc_time. You need to make appropriate changes to reutrn HRV_resample and
-% qrs_loc_time_resample.
-[HRV qrs_loc_time HRV_resample qrs_loc_time_resample]=s_get_HRV(qrs, f_resample, fs);
-
-figure;
-plot(qrs_loc_time(2:end),HRV);
-title('HRV tachogram');
-xlabel('Time of RR (seconds)')
-xlabel('RR interval (seconds)');
-
-% THIS FOURIER TRANSFORM WILL ONLY WORK WHEN THE APPROPRIATE CHANGES WERE
-% MADE TO THE s_get_HRV function FOR THE HRV_resample and
-% qrs_loc_time_resample
-
-% temp=HRV_resample(~isnan(HRV_resample));
-% HRV_psd=abs((fftshift(fft(temp)).^2)/length(temp)); %PSD (s^2/Hz) estimation
-% freq_axis=-f_resample/2:f_resample/(length(HRV_psd)):...
-%         (f_resample/2-f_resample/(length(HRV_psd)));
+% 
+% qrs=s_detect_qrs(ecg,b_low,b_high,b_avg,delay);
 % figure;
-% plot(freq_axis,HRV_psd);
-% xlabel('Frequency (Hz)'); ylabel('PSD (s^2/Hz)');
-% axis([0,0.4,0,20]);
-
-%% Part 3: Extracting HRV Parameters
-
-% TASK: EXTRACT PARAMETERS FOR EACH OF THE HRV SEGMENTS (FOR EACH
-% EXPERIMENTAL STAGE). TIME DOMAIN, FREQUENCY DOMAIN AND NON-LINEAR 
-% PARAMETERS (OPTIONAL) 
-
-% Time Domain Parameters
-% mean
-% standard deviation of NN intervals
-% RMS of difference between adjacent NN intervals
-% STD of difference between adjacent NN intervals
-% NN50 - number of NN intervals that differ by less than 50 ms
-% pNN50 - percentage of NN intervals that differ by less than 50 ms from
-% all NN intervals
-
-% Frequency Domain Parameters
-% Total HRV Positive frequency range
-% VLF - HRV from 0.00 to 0.04
-% LF - HRV from 0.05 to 0.15 Hz (normalize)
-% HF - HRV from 0.16 to 0.40 Hz (normalize)
-% Ratio of LF to HF
-
-%% Part 4: Present HRV results
-
-% TASK: PRESENT HRV PARAMETERS IN BOX AND WHISKER PLOTS BETWEEN THE FOUR
-% EXPERIMENTAL STAGES. YOU HAVE THE OPTION TO ATTEMPT BAYESION
-% CLASSIFICATION OF THE RESULTS.
+% plot(1:length(qrs),5000*qrs,1:length(ecg),ecg);
+% 
+% 
+% 
+% line([startPoint(1,1),startPoint(1,1)],[0,5000],'LineWidth',1,'Color','Green');
+% line([startPoint(1,2),startPoint(1,2)],[0,5000],'LineWidth',1,'Color','Green');
+% line([startPoint(1,3),startPoint(1,3)],[0,5000],'LineWidth',1,'Color','Green');
+% line([startPoint(1,4),startPoint(1,4)],[0,5000],'LineWidth',1,'Color','Green');
+% 
+% title('ECG with detected QRS')
+% 
+% % TASK: SEGMENT ECG APPROPRIATELY AND FIND QRS FOR EACH INDIVIDUAL SEGMENT
+% % ECG SHOULD BE SEGMENTED ACCORDING TO THE EXPERIMENTAL STAGES
+% 
+% %% Part 2: Calculating HRV
+% % Example of computing HRV
+% f_resample=8;
+% 
+% % TASK: FOR EACH SEGMENT OF THE QRS DETECTED SEGMENTS CALCULATE THE HRV 
+% % TACHOGRAM AND RESAMPLE IT EVENLY TO 8 Hz 
+% % (make changes in s_get_HRV use the interp1 function to interpolate the HRV)
+% 
+% % This version of the s_get_HRV online returns correct values for HRV and
+% % qrs_loc_time. You need to make appropriate changes to reutrn HRV_resample and
+% % qrs_loc_time_resample.
+% [HRV, qrs_loc_time, HRV_resample, qrs_loc_time_resample]=s_get_HRV(qrs, f_resample, fs);
+% 
+% figure;
+% plot(qrs_loc_time(2:end),HRV);
+% title('HRV tachogram');
+% xlabel('Time of RR (seconds)')
+% xlabel('RR interval (seconds)');
+% 
+% % THIS FOURIER TRANSFORM WILL ONLY WORK WHEN THE APPROPRIATE CHANGES WERE
+% % MADE TO THE s_get_HRV function FOR THE HRV_resample and
+% % qrs_loc_time_resample
+% 
+% % temp=HRV_resample(~isnan(HRV_resample));
+% % HRV_psd=abs((fftshift(fft(temp)).^2)/length(temp)); %PSD (s^2/Hz) estimation
+% % freq_axis=-f_resample/2:f_resample/(length(HRV_psd)):...
+% %         (f_resample/2-f_resample/(length(HRV_psd)));
+% % figure;
+% % plot(freq_axis,HRV_psd);
+% % xlabel('Frequency (Hz)'); ylabel('PSD (s^2/Hz)');
+% % axis([0,0.4,0,20]);
+% 
+% %% Part 3: Extracting HRV Parameters
+% 
+% % TASK: EXTRACT PARAMETERS FOR EACH OF THE HRV SEGMENTS (FOR EACH
+% % EXPERIMENTAL STAGE). TIME DOMAIN, FREQUENCY DOMAIN AND NON-LINEAR 
+% % PARAMETERS (OPTIONAL) 
+% 
+% % Time Domain Parameters
+% % mean
+% % standard deviation of NN intervals
+% % RMS of difference between adjacent NN intervals
+% % STD of difference between adjacent NN intervals
+% % NN50 - number of NN intervals that differ by less than 50 ms
+% % pNN50 - percentage of NN intervals that differ by less than 50 ms from
+% % all NN intervals
+% 
+% % Frequency Domain Parameters
+% % Total HRV Positive frequency range
+% % VLF - HRV from 0.00 to 0.04
+% % LF - HRV from 0.05 to 0.15 Hz (normalize)
+% % HF - HRV from 0.16 to 0.40 Hz (normalize)
+% % Ratio of LF to HF
+% 
+% %% Part 4: Present HRV results
+% 
+% % TASK: PRESENT HRV PARAMETERS IN BOX AND WHISKER PLOTS BETWEEN THE FOUR
+% % EXPERIMENTAL STAGES. YOU HAVE THE OPTION TO ATTEMPT BAYESION
+% % CLASSIFICATION OF THE RESULTS.
