@@ -42,20 +42,16 @@ segment{4} = ecg(startPoint(subject_no,3)+1:startPoint(subject_no,4))';
 segment{5} = ecg(startPoint(subject_no,4)+1:end)';
 
 % Detection of QRS segments and plotting
-
 for i = 1:5
     qrs{i} = s_detect_qrs(segment{i}, b_low, b_high, b_avg, delay);
     figure(i);
     plot (1:length(qrs{i}),5000*qrs{i}, 1:length(segment{i}), segment{i});
 end
 
-
-
-
-% qrs=s_detect_qrs(ecg,b_low,b_high,b_avg,delay);
-% figure;
-% plot(1:length(qrs),5000*qrs,1:length(ecg),ecg);
-% title('ECG with detected QRS')
+tot_qrs=s_detect_qrs(ecg,b_low,b_high,b_avg,delay);
+figure;
+plot(1:length(tot_qrs),5000*tot_qrs,1:length(ecg),ecg);
+title('ECG with detected QRS')
 
 % TASK: SEGMENT ECG APPROPRIATELY AND FIND QRS FOR EACH INDIVIDUAL SEGMENT
 % ECG SHOULD BE SEGMENTED ACCORDING TO THE EXPERIMENTAL STAGES
