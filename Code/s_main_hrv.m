@@ -40,23 +40,15 @@ Segment{4} = ecg(startPoint(1,3)+1:startPoint(1,4));
 Segment{5} = ecg(startPoint(1,4)+1:length(ecg));
 
 for i = 1:5
-    qrs{i}=s_detect_qrs(Segment{i},b_low,b_high,b_avg,delay);
+    qrs{i} = s_detect_qrs(Segment{i},b_low,b_high,b_avg,delay);
+    qrs{i} = s_detect_filtering(Segment{i},qrs{i});
 end
 
-qrsn = s_detect_filtering(Segment{1},qrs{1});
+
 figure;
-hold on
 plot(1:length(qrs{1}),5000*qrs{1},1:length(Segment{1}),Segment{1});
-plot(1:length(qrs{1}),5000*qrsn,'g');
 
-
-% 
-% qrs=s_detect_qrs(ecg,b_low,b_high,b_avg,delay);
-% figure;
-% plot(1:length(qrs),5000*qrs,1:length(ecg),ecg);
-% 
-% 
-% 
+ 
 % line([startPoint(1,1),startPoint(1,1)],[0,5000],'LineWidth',1,'Color','Green');
 % line([startPoint(1,2),startPoint(1,2)],[0,5000],'LineWidth',1,'Color','Green');
 % line([startPoint(1,3),startPoint(1,3)],[0,5000],'LineWidth',1,'Color','Green');
