@@ -19,7 +19,7 @@ startPoint=[15576+10*60*512 15576+(10+8)*60*512 15576+(10+8+6)*60*512 15576+(10+
         8821+10*60*512 8821+(10+7)*60*512 8821+(10+7+6)*60*512 8821+(10+7+6+6)*60*512;
         40000+10*60*512 40000+(10+7.25)*60*512 40000+(10+7.25+6)*60*512 40000+(10+7.25+6+6)*60*512];
 % Names of four experimental stages
-classes={'neutral';'negative';'mental task';'neutral';'baseline'};
+classes={'neutral';'negative';'mental_task';'neutral';'baseline'};
 % Names of files with ECG data from 10 subjects
 names={'sub1_29_05_2013'; 'sub2_29_05_2013'; 'sub3_29_05_2013'; 
         'sub4_29_05_2013'; 'sub5_29_05_2013'; 'sub6_29_05_2013';
@@ -91,7 +91,7 @@ end
 % MADE TO THE s_get_HRV function FOR THE HRV_resample and
 % qrs_loc_time_resample
 
-figure; hold on
+figure; hold on;
 for i = 1:5
 temp=HRV_resample{i}(~isnan(HRV_resample{i}));
 HRV_psd=abs((fftshift(fft(temp)).^2)/length(temp)); %PSD (s^2/Hz) estimation
@@ -100,10 +100,9 @@ freq_axis=-f_resample/2:f_resample/(length(HRV_psd)):...
 plot(freq_axis,HRV_psd);
 end
 
-legend(classes);
 xlabel('Frequency (Hz)'); ylabel('PSD (s^2/Hz)');
 axis([0,0.4,0,20]);
-hold off
+
 
 %% Part 3: Extracting HRV Parameters
 % 
