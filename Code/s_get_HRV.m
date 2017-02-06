@@ -22,7 +22,8 @@ function [HRV qrs_loc HRV_resample qrs_loc_resample] = s_get_HRV(qrs_time, f_res
     
     % TASK: Resample HRV
     % Reampling HRV for frequency analysis
-    qrs_loc_resample=0;  % Resampled time series
-    HRV_resample=0;     % Resamples HRV
+    qrs_loc_resample = (ceil(qrs_loc(1)):1/f_resample:floor(qrs_loc(end)));
+    HRV_resample = interp1(qrs_loc(2:end), HRV, qrs_loc_resample');
+    
     
 end
