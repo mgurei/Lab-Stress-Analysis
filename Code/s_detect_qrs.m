@@ -15,7 +15,7 @@ function [qrs]=s_detect_qrs(ecg,b_low,b_high,b_avg,delay)
     % Try to make improvals based on these variables or improve the
     % detection process itself
     fs=256;
-    T_ref=0.25*fs; % 0.25 second refractory period
+    T_ref=0.5*fs; % 0.25 second refractory period
     window=2*fs; % 2 second window
     h_thresh=0; % initial value of h_thresh
     h_thresh_correct=0.4; % correction value for h_thresh
