@@ -16,7 +16,7 @@ function [qrs]=s_detect_qrs(ecg,b_low,b_high,b_avg,delay)
     % detection process itself
     fs=256;
     T_ref=0.25*fs; % 0.25 second refractory period
-    window=2*fs; % 2 second window
+    window=3*fs; % 3 second window
     h_thresh=0; % initial value of h_thresh
     h_thresh_correct=0.4; % correction value for h_thresh
     
@@ -31,37 +31,32 @@ function [qrs]=s_detect_qrs(ecg,b_low,b_high,b_avg,delay)
     last_qrs=0;
     
     %% Filter Stage
-    figure;
+    %figure;    
     
     % Lowpass Filter 
     ecg_2=filter(b_low,1,ecg);
-    subplot(5,1,1);
-    plot(ecg_2);
-    title('Lowpass');
-   
+    %plot(ecg_2);
+ 
     % Highpass Filter 
     ecg_3=filter(b_high,1,ecg_2);
-    subplot(5,1,2);
-    plot(ecg_3);
-    title('Highpass');
+
+    %plot(ecg_3);
+
     
     % Subtract mean
     ecg_4=ecg_3-mean(ecg_3);
-    subplot(5,1,3);
-    plot(ecg_4)
-    title('Mean');
+    %plot(ecg_4)
+
     
     % Absolute
     ecg_5=abs(ecg_4);
-    subplot(5,1,4);
-    plot(ecg_5)
-    title('absolute');
+    %plot(ecg_5)
+
     
     % Average
     ecg_6=filter(b_avg,1,ecg_5);
-    subplot(5,1,5);
-    plot(ecg_6);
-    title('Final stage of filtering in QRS Detection');
+    %plot(ecg_6);
+
     
     %% Detection
     qrs_loc=zeros(length(ecg),1);

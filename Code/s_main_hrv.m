@@ -43,8 +43,11 @@ for i = 1:5
     qrs{i}=s_detect_qrs(Segment{i},b_low,b_high,b_avg,delay);
 end
 
+qrsn = s_detect_filtering(Segment{1},qrs{1});
 figure;
+hold on
 plot(1:length(qrs{1}),5000*qrs{1},1:length(Segment{1}),Segment{1});
+plot(1:length(qrs{1}),5000*qrsn,'g');
 
 
 % 
