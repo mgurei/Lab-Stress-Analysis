@@ -39,8 +39,6 @@ Segment{3} = ecg(startPoint(1,2)+1:startPoint(1,3));
 Segment{4} = ecg(startPoint(1,3)+1:startPoint(1,4));
 Segment{5} = ecg(startPoint(1,4)+1:length(ecg));
 
-
-
 % Old Algorithm
 % for i = 1:5
 %     qrs{i} = s_detect_qrs(Segment{i},b_low,b_high,b_avg,delay);
@@ -81,6 +79,7 @@ f_resample=8;
 % HRV and HRV resampled calculation
 for i = 1:5
 [~, ~, HRV_resample{i}, qrs_loc_time_resample{i}] = s_get_HRV(qrs{i}, f_resample, fs);
+    HRV_resample{i}(isnan(HRV_resample{i})) = [];
 end
 % % Plotting HRV
 % figure;
@@ -130,7 +129,9 @@ hold off
 % % NN50 - number of NN intervals that differ by less than 50 ms
 % % pNN50 - percentage of NN intervals that differ by less than 50 ms from
 % % all NN intervals
-% 
+
+
+
 % % Frequency Domain Parameters
 % % Total HRV Positive frequency range
 % % VLF - HRV from 0.00 to 0.04
