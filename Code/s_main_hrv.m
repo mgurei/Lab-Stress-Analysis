@@ -47,8 +47,9 @@ Segment{5} = ecg(startPoint(1,4)+1:length(ecg));
 
 % New Algorithm
 for i=1:5
-    [qrs_amp_raw,qrs{i},delay]=pan_tompkin(Segment{i},fs,0);
-    qrs{i} = transforMat(qrs{i},length(Segment{i}));
+    [qrs_amp_raw,qrsi{i},delay]=pan_tompkin(Segment{i},fs,0);
+    numNN{i} = length(qrsi{i});
+    qrs{i} = transforMat(qrsi{i},length(Segment{i}));
 end
 
 figure;
@@ -129,9 +130,20 @@ hold off
 % % NN50 - number of NN intervals that differ by less than 50 ms
 % % pNN50 - percentage of NN intervals that differ by less than 50 ms from
 % % all NN intervals
+limit_50ms = 0.05;
 
+for i = 1:5
+HRV_mean{i} = mean(HRV_resample{i});
+HRV_std{i} = std(HRV_resample{i});
 
-
+    for j = 1:(length(HRV_resample{i})-1)
+       NN_diff{i}(j) = HRV_resample{i}(j+1) - HRV_resample{i}(j);      
+    end
+NN_diff_rms{i} = rms(NN_diff{i});
+NN_diff_std{i} = std(NN_diff{i});
+NN50{i} = HRV_resample{i} (HRV_resample{i} < limit_50ms);
+pNN50{i} = 100* NN50{i}/ numNN{i};
+end
 % % Frequency Domain Parameters
 % % Total HRV Positive frequency range
 % % VLF - HRV from 0.00 to 0.04
@@ -150,6 +162,7 @@ LF_band_power{i} = bandpower(HRV_psd{i},f_resample, LF_range);
 HF_band_power{i} = bandpower(HRV_psd{i},f_resample, HF_range);
 ratioLH{i} = LF_band_power{i}/HF_band_power{i};
 end
+
 
 % %% Part 4: Present HRV results
 % 
