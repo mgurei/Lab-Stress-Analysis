@@ -101,7 +101,8 @@ plot(freq_axis,HRV_psd);
 end
 
 legend(classes);
-xlabel('Frequency (Hz)'); ylabel('PSD (s^2/Hz)');
+xlabel('Normalized frequency (Hz)'); ylabel('PSD (s^2/Hz)');
+title('Power Spectra distribution')
 axis([0,0.4,0,20]);
 hold off
 
