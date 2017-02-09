@@ -118,10 +118,10 @@ hold off
 
 %% Part 3: Extracting HRV Parameters
 % 
-% % TASK: EXTRACT PARAMETERS FOR EACH OF THE HRV SEGMENTS (FOR EACH
-% % EXPERIMENTAL STAGE). TIME DOMAIN, FREQUENCY DOMAIN AND NON-LINEAR 
-% % PARAMETERS (OPTIONAL) 
-% 
+% TASK: EXTRACT PARAMETERS FOR EACH OF THE HRV SEGMENTS (FOR EACH
+% EXPERIMENTAL STAGE). TIME DOMAIN, FREQUENCY DOMAIN AND NON-LINEAR 
+% PARAMETERS (OPTIONAL) 
+
 % % Time Domain Parameters
 % % mean
 % % standard deviation of NN intervals
@@ -149,7 +149,7 @@ end
 % % VLF - HRV from 0.00 to 0.04
 % % LF - HRV from 0.05 to 0.15 Hz (normalize)
 % % HF - HRV from 0.16 to 0.40 Hz (normalize)
-% % Ratio of LF to HF
+% Ratio of LF to HF
 tot_range = [0 f_resample/2-0.01];
 VLF_range = [0 0.04];
 LF_range = [0.05 0.15];
@@ -164,7 +164,45 @@ ratioLH{i} = LF_band_power{i}/HF_band_power{i};
 end
 
 
+
 % %% Part 4: Present HRV results
+
+% %% NON-LINEAR PARAMETERS
+for i = 1:5  % Approximate entropy
+    AppEn{i} = ApEn( 2, 0.2*SDNN{i}, Segment{i}); 
+    %   dim : embedded dimension
+    %   r : tolerance (typically 0.2 * std)
+    %   data : time-series data
+    % The smaller the value, the more regular and preditive the sequence is
+end
+
+for i = 1:5  % Sample entropy
+    SaEn{i} = SampEn( 2, 0.2*SDNN{i}, Segment{i}); 
+    %   dim     : embedded dimension
+    %   r       : tolerance (typically 0.2 * std)
+    %   data    : time-series data
+end
+
+for i = 1:5  % Correlation dimention
+    [D2, Cm, epsilon] = corrdim(Segment{i},2,tau,epsilon,sloperange); 
+    %   m - embedding dimension
+    %   tau - delay time lag
+    
+end
+
+
+
+[Alpha1 Alpha2]=DFA_main(DATA); % Detrended fluctuation analysis
+% DATA should be a time series of length(DATA) greater than 2000,and of column vector.
+%   A is the alpha in the paper
+%   D is the dimension of the time series
+%   n can be changed to your interest
+
+
+
+
+%% Part 4: Present HRV results
+
 % 
 % % TASK: PRESENT HRV PARAMETERS IN BOX AND WHISKER PLOTS BETWEEN THE FOUR
 % % EXPERIMENTAL STAGES. YOU HAVE THE OPTION TO ATTEMPT BAYESION

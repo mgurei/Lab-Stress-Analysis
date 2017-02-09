@@ -39,6 +39,11 @@ Segment{3} = ecg(startPoint(1,2)+1:startPoint(1,3));
 Segment{4} = ecg(startPoint(1,3)+1:startPoint(1,4));
 Segment{5} = ecg(startPoint(1,4)+1:length(ecg));
 
+<<<<<<< HEAD
+=======
+
+
+>>>>>>> Added a section with non-linear data
 % Old Algorithm
 % for i = 1:5
 %     qrs{i} = s_detect_qrs(Segment{i},b_low,b_high,b_avg,delay);
@@ -48,7 +53,10 @@ Segment{5} = ecg(startPoint(1,4)+1:length(ecg));
 % New Algorithm
 for i=1:5
     [qrs_amp_raw,qrsi{i},delay]=pan_tompkin(Segment{i},fs,0);
+<<<<<<< HEAD
     numNN{i} = length(qrsi{i});
+=======
+>>>>>>> Added a section with non-linear data
     qrs{i} = transforMat(qrsi{i},length(Segment{i}));
 end
 
@@ -118,10 +126,10 @@ hold off
 
 %% Part 3: Extracting HRV Parameters
 % 
-% % TASK: EXTRACT PARAMETERS FOR EACH OF THE HRV SEGMENTS (FOR EACH
-% % EXPERIMENTAL STAGE). TIME DOMAIN, FREQUENCY DOMAIN AND NON-LINEAR 
-% % PARAMETERS (OPTIONAL) 
-% 
+% TASK: EXTRACT PARAMETERS FOR EACH OF THE HRV SEGMENTS (FOR EACH
+% EXPERIMENTAL STAGE). TIME DOMAIN, FREQUENCY DOMAIN AND NON-LINEAR 
+% PARAMETERS (OPTIONAL) 
+
 % % Time Domain Parameters
 % % mean
 % % standard deviation of NN intervals
@@ -149,11 +157,26 @@ end
 % % VLF - HRV from 0.00 to 0.04
 % % LF - HRV from 0.05 to 0.15 Hz (normalize)
 % % HF - HRV from 0.16 to 0.40 Hz (normalize)
+<<<<<<< HEAD
 % % Ratio of LF to HF
+=======
+% Ratio of LF to HF
+>>>>>>> Added a section with non-linear data
 tot_range = [0 f_resample/2-0.01];
 VLF_range = [0 0.04];
 LF_range = [0.05 0.15];
 HF_range = [0.16 0.4];
+<<<<<<< HEAD
+
+for i = 1:5
+tot_band_power{i} = bandpower(HRV_psd{i},f_resample, tot_range);
+VLF_band_power{i} = bandpower(HRV_psd{i},f_resample, VLF_range);
+LF_band_power{i} = bandpower(HRV_psd{i},f_resample, LF_range);
+HF_band_power{i} = bandpower(HRV_psd{i},f_resample, HF_range);
+ratioLH{i} = LF_band_power{i}/HF_band_power{i};
+end
+=======
+>>>>>>> Added a section with non-linear data
 
 for i = 1:5
 tot_band_power{i} = bandpower(HRV_psd{i},f_resample, tot_range);
@@ -163,8 +186,38 @@ HF_band_power{i} = bandpower(HRV_psd{i},f_resample, HF_range);
 ratioLH{i} = LF_band_power{i}/HF_band_power{i};
 end
 
-
+<<<<<<< HEAD
 % %% Part 4: Present HRV results
+=======
+% %% NON-LINEAR PARAMETERS
+for i = 1:5
+    AppEn{i} = ApEn( 2, 0.2*SDNN{i}, Segment{i}); % Approximate entropy
+    %   dim : embedded dimension
+    %   r : tolerance (typically 0.2 * std)
+    %   data : time-series data
+    % The smaller the value, the more regular and preditiv
+    The value is very small, so it implies the sequence is regular and predictable,
+end
+
+[D2, Cm, epsilon] = corrdim(x,m,tau,epsilon,sloperange); % Correlation dimention
+%   m - embedding dimension
+%   tau - delay time lag
+
+[Alpha1 Alpha2]=DFA_main(DATA); % Detrended fluctuation analysis
+% DATA should be a time series of length(DATA) greater than 2000,and of column vector.
+%   A is the alpha in the paper
+%   D is the dimension of the time series
+%   n can be changed to your interest
+
+
+saen = SampEn( dim, r, data, tau ); % Sample entropy
+%   dim     : embedded dimension
+%   r       : tolerance (typically 0.2 * std)
+%   data    : time-series data
+%   tau     : delay time for downsampling (user can omit this, in which case the default value is 1)
+
+%% Part 4: Present HRV results
+>>>>>>> Added a section with non-linear data
 % 
 % % TASK: PRESENT HRV PARAMETERS IN BOX AND WHISKER PLOTS BETWEEN THE FOUR
 % % EXPERIMENTAL STAGES. YOU HAVE THE OPTION TO ATTEMPT BAYESION
