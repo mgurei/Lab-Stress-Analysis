@@ -39,9 +39,18 @@ Segment{3} = ecg(startPoint(1,2)+1:startPoint(1,3));
 Segment{4} = ecg(startPoint(1,3)+1:startPoint(1,4));
 Segment{5} = ecg(startPoint(1,4)+1:length(ecg));
 
-for i = 1:5
-    qrs{i} = s_detect_qrs(Segment{i},b_low,b_high,b_avg,delay);
-    qrs{i} = s_detect_filtering(Segment{i},qrs{i});
+
+
+% Old Algorithm
+% for i = 1:5
+%     qrs{i} = s_detect_qrs(Segment{i},b_low,b_high,b_avg,delay);
+%     qrs{i} = s_detect_filtering(Segment{i},qrs{i});
+% end
+
+% New Algorithm
+for i=1:5
+    [qrs_amp_raw,qrs{i},delay]=pan_tompkin(Segment{i},fs,0);
+    qrs{i} = transforMat(qrs{i},length(Segment{i}));
 end
 
 figure;

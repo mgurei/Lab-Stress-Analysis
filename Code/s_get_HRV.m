@@ -15,7 +15,6 @@ function [HRV qrs_loc HRV_resample qrs_loc_resample] = s_get_HRV(qrs_time, f_res
 
     % Timeline of ECG
     t=1/fs:1/fs:length(qrs_time)*1/fs;
-
     % Find time instances of QRS complex
     qrs_loc=t(qrs_time~=0);
     HRV=diff(qrs_loc); %Calculate interbeat differences
