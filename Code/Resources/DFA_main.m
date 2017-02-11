@@ -1,4 +1,3 @@
- 
 function [Alpha1 Alpha2]=DFA_main(DATA)
 % DATA should be a time series of length(DATA) greater than 2000,and of column vector.
 %A is the alpha in the paper

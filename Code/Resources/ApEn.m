@@ -4,18 +4,6 @@ function apen = ApEn( dim, r, data, tau )
 %   r : tolerance (typically 0.2 * std)
 %   data : time-series data
 %   tau : delay time for downsampling
-
-%   Changes in version 1
-%       Ver 0 had a minor error in the final step of calculating ApEn
-%       because it took logarithm after summation of phi's.
-%       In Ver 1, I restored the definition according to original paper's
-%       definition, to be consistent with most of the work in the
-%       literature. Note that this definition won't work for Sample
-%       Entropy which doesn't count self-matching case, because the count 
-%       can be zero and logarithm can fail.
-%
-%       A new parameter tau is added in the input argument list, so the users
-%       can apply ApEn on downsampled data by skipping by tau. 
 %---------------------------------------------------------------------
 % coded by Kijoon Lee,  kjlee@ntu.edu.sg
 % Ver 0 : Aug 4th, 2011
