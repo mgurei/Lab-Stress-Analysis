@@ -141,8 +141,10 @@ NN_mean(1,i) = mean(HRV_resample{i}); %mean of HRV
 NN_std(1,i) = std(HRV_resample{i});   %standard deviantion HRV
 NN_diff_rms(1,i) = rms(NN_diff);       %RMS of NN diff
 NN_diff_std(1,i) = std(NN_diff);       %standard deviation od NN diff
-NN50(1,i) = HRV_resample{i} (HRV_resample{i} < limit_50ms);   %NN less the 50ms
-pNN50(1,i) = 100* NN50{i}/ numNN{i};   % percentage NN50 in all HRV
+if ~isempty(HRV_resample{i} (HRV_resample{i} < limit_50ms))
+      NN50(1,i) = HRV_resample{i} (HRV_resample{i} < limit_50ms);   %NN less the 50ms
+      pNN50(1,i) = 100* NN50{i}/ numNN{i};   % percentage NN50 in all HRV
+end
 end
 
 % Frequency Domain Parameters
@@ -172,11 +174,11 @@ tot_band_power(1,i) = (HRV_psd{i}(tot_range)'*HRV_psd{i}(tot_range) )/ (length(t
 VLF_band_power(1,i) = (HRV_psd{i}(VLF_range)'*HRV_psd{i}(VLF_range) )/ (length(VLF_range));
 LF_band_power(1,i) = (HRV_psd{i}(LF_range)'*HRV_psd{i}(LF_range) )/ (length(LF_range));
 HF_band_power(1,i) = (HRV_psd{i}(HF_range)'*HRV_psd{i}(HF_range) )/ (length(HF_range));
-ratioLH{i} = LF_band_power{i}/HF_band_power{i};
+ratioLH(1,i) = LF_band_power(1,i)/HF_band_power(1,i);
 % percentage of the bands compared to the total
-pVLF{i} = VLF_band_power(1,i)/tot_band_power{i} * 100;
-pLF{i} = LF_band_power(1,i)/tot_band_power{i} * 100;
-pHF{i} = HF_band_power(1,i)/tot_band_power{i} * 100;
+pVLF(1,i) = VLF_band_power(1,i)/tot_band_power(1,i) * 100;
+pLF(1,i) = LF_band_power(1,i)/tot_band_power(1,i) * 100;
+pHF(1,i) = HF_band_power(1,i)/tot_band_power(1,i) * 100;
 
 end
 
@@ -191,7 +193,7 @@ AppEn = zeros(1,length(classes));
 SaEn = zeros(1,length(classes));
 
 for i = 1:5  
-    toll = .2 * NN_std{i}; %tollerance 
+    toll = .2 * NN_std(1,i); %tollerance 
     AppEn(1,i) = ApEn( dim, toll, HRV_resample{i}); % Approximate entropy
     SaEn(1,i) = SampEn( dim, toll, HRV_resample{i}); %Sample Entropy
 %    [D2, Cm, epsilon] = corrdim(HRV_resample{i},dim,tau,epsilon,sloperange); 
