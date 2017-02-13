@@ -19,7 +19,7 @@ startPoint=[15576+10*60*512 15576+(10+8)*60*512 15576+(10+8+6)*60*512 15576+(10+
         8821+10*60*512 8821+(10+7)*60*512 8821+(10+7+6)*60*512 8821+(10+7+6+6)*60*512;
         40000+10*60*512 40000+(10+7.25)*60*512 40000+(10+7.25+6)*60*512 40000+(10+7.25+6+6)*60*512];
 % Names of four experimental stages
-classes={'normal activity';'negative';'mental task';'neutral';'baseline'};
+classes={'Normal activity';'Negative';'Mental task';'Neutral';'Baseline'};
 % Names of files with ECG data from 10 subjects
 names={'sub1_29_05_2013'; 'sub2_29_05_2013'; 'sub3_29_05_2013'; 
         'sub4_29_05_2013'; 'sub5_29_05_2013'; 'sub6_29_05_2013';
@@ -214,8 +214,8 @@ grp = [zeros(1,length(HRV_resample{1})), ones(1,length(HRV_resample{2})), ...
     2*ones(1,length(HRV_resample{3})), 3*ones(1,length(HRV_resample{4})), ...
     4*ones(1,length(HRV_resample{5}))];
 figure()
-boxplot(hrv_prep, grp);
-title('HRV for ')
+boxplot(hrv_prep, grp, 'Labels', classes);
+title('HRV for all segment')
 
 
 
