@@ -126,8 +126,8 @@ hold off
 % pNN50 - percentage of NN intervals that differ by less than 50 ms from
 % all NN intervals
 limit_50ms = 0.05;
-HRV_mean = cell(1,length(classes));
-HRV_std = cell(1,length(classes));
+NN_mean = cell(1,length(classes));
+NN_std = cell(1,length(classes));
 NN_diff_rms = cell(1,length(classes));
 NN_diff_std = cell(1,length(classes));
 NN50 = cell(1,length(classes));
@@ -190,7 +190,7 @@ AppEn = cell(1,length(classes));
 SaEn = cell(1,length(classes));
 
 for i = 1:5  
-    toll = .2 * NN_diff_std{i}; %tollerance 
+    toll = .2 * NN_std{i}; %tollerance 
     AppEn{i} = ApEn( dim, toll, HRV_resample{i}); % Approximate entropy
     SaEn{i} = SampEn( dim, toll, HRV_resample{i}); %Sample Entropy
 %    [D2, Cm, epsilon] = corrdim(HRV_resample{i},dim,tau,epsilon,sloperange); 
