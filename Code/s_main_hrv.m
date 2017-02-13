@@ -19,7 +19,7 @@ startPoint=[15576+10*60*512 15576+(10+8)*60*512 15576+(10+8+6)*60*512 15576+(10+
         8821+10*60*512 8821+(10+7)*60*512 8821+(10+7+6)*60*512 8821+(10+7+6+6)*60*512;
         40000+10*60*512 40000+(10+7.25)*60*512 40000+(10+7.25+6)*60*512 40000+(10+7.25+6+6)*60*512];
 % Names of four experimental stages
-classes={'neutral';'negative';'mental task';'neutral';'baseline'};
+classes={'normal activity';'negative';'mental task';'neutral';'baseline'};
 % Names of files with ECG data from 10 subjects
 names={'sub1_29_05_2013'; 'sub2_29_05_2013'; 'sub3_29_05_2013'; 
         'sub4_29_05_2013'; 'sub5_29_05_2013'; 'sub6_29_05_2013';
@@ -127,22 +127,22 @@ hold off
 % pNN50 - percentage of NN intervals that differ by less than 50 ms from
 % all NN intervals
 limit_50ms = 0.05;
-NN_mean = cell(1,length(classes));
-NN_std = cell(1,length(classes));
-NN_diff_rms = cell(1,length(classes));
-NN_diff_std = cell(1,length(classes));
-NN50 = cell(1,length(classes));
-pNN50 = cell(1,length(classes));
+NN_mean = zeros(1,length(classes));
+NN_std = zeros(1,length(classes));
+NN_diff_rms = zeros(1,length(classes));
+NN_diff_std = zeros(1,length(classes));
+NN50 = zeros(1,length(classes));
+pNN50 = zeros(1,length(classes));
 
 for i = 1:5
 NN_diff = diff(HRV_resample{i}); % difference between adjancent NN intervals    
 
-HRV_mean{i} = mean(HRV_resample{i}); %mean of HRV
-NN_std{i} = std(HRV_resample{i});   %standard deviantion HRV
-NN_diff_rms{i} = rms(NN_diff);       %RMS of NN diff
-NN_diff_std{i} = std(NN_diff);       %standard deviation od NN diff
-NN50{i} = HRV_resample{i} (HRV_resample{i} < limit_50ms);   %NN less the 50ms
-pNN50{i} = 100* NN50{i}/ numNN{i};   % percentage NN50 in all HRV
+NN_mean(1,i) = mean(HRV_resample{i}); %mean of HRV
+NN_std(1,i) = std(HRV_resample{i});   %standard deviantion HRV
+NN_diff_rms(1,i) = rms(NN_diff);       %RMS of NN diff
+NN_diff_std(1,i) = std(NN_diff);       %standard deviation od NN diff
+NN50(1,i) = HRV_resample{i} (HRV_resample{i} < limit_50ms);   %NN less the 50ms
+pNN50(1,i) = 100* NN50{i}/ numNN{i};   % percentage NN50 in all HRV
 end
 
 % Frequency Domain Parameters
@@ -151,14 +151,14 @@ end
 % LF - HRV from 0.05 to 0.15 Hz (normalize)
 % HF - HRV from 0.16 to 0.40 Hz (normalize)
 % Ratio of LF to HF
-tot_band_power = cell(1,length(classes));
-VLF_band_power = cell(1,length(classes));
-LF_band_power = cell(1,length(classes));
-HF_band_power = cell(1,length(classes));
-ratioLH = cell(1,length(classes));
-pVLF = cell(1,length(classes));
-pLF = cell(1,length(classes));
-pHF = cell(1,length(classes));
+tot_band_power = zeros(1,length(classes));
+VLF_band_power = zeros(1,length(classes));
+LF_band_power = zeros(1,length(classes));
+HF_band_power = zeros(1,length(classes));
+ratioLH = zeros(1,length(classes));
+pVLF = zeros(1,length(classes));
+pLF = zeros(1,length(classes));
+pHF = zeros(1,length(classes));
 
 for i = 1:5
 % frenquency used
@@ -168,15 +168,15 @@ LF_range = find(freq_axis{i}>=0.05 & freq_axis{i}<=0.15);
 HF_range = find(freq_axis{i}>=0.16 & freq_axis{i}<=0.4);
 
 %calculations
-tot_band_power{i} = (HRV_psd{i}(tot_range)'*HRV_psd{i}(tot_range) )/ (length(tot_range));
-VLF_band_power{i} = (HRV_psd{i}(VLF_range)'*HRV_psd{i}(VLF_range) )/ (length(VLF_range));
-LF_band_power{i} = (HRV_psd{i}(LF_range)'*HRV_psd{i}(LF_range) )/ (length(LF_range));
-HF_band_power{i} = (HRV_psd{i}(HF_range)'*HRV_psd{i}(HF_range) )/ (length(HF_range));
+tot_band_power(1,i) = (HRV_psd{i}(tot_range)'*HRV_psd{i}(tot_range) )/ (length(tot_range));
+VLF_band_power(1,i) = (HRV_psd{i}(VLF_range)'*HRV_psd{i}(VLF_range) )/ (length(VLF_range));
+LF_band_power(1,i) = (HRV_psd{i}(LF_range)'*HRV_psd{i}(LF_range) )/ (length(LF_range));
+HF_band_power(1,i) = (HRV_psd{i}(HF_range)'*HRV_psd{i}(HF_range) )/ (length(HF_range));
 ratioLH{i} = LF_band_power{i}/HF_band_power{i};
 % percentage of the bands compared to the total
-pVLF{i} = VLF_band_power{i}/tot_band_power{i} * 100;
-pLF{i} = LF_band_power{i}/tot_band_power{i} * 100;
-pHF{i} = HF_band_power{i}/tot_band_power{i} * 100;
+pVLF{i} = VLF_band_power(1,i)/tot_band_power{i} * 100;
+pLF{i} = LF_band_power(1,i)/tot_band_power{i} * 100;
+pHF{i} = HF_band_power(1,i)/tot_band_power{i} * 100;
 
 end
 
@@ -187,17 +187,17 @@ end
 % - 
 dim = 2; % embedded dimension
 tau = 0.1; %delay time lag
-AppEn = cell(1,length(classes));
-SaEn = cell(1,length(classes));
+AppEn = zeros(1,length(classes));
+SaEn = zeros(1,length(classes));
 
 for i = 1:5  
     toll = .2 * NN_std{i}; %tollerance 
-    AppEn{i} = ApEn( dim, toll, HRV_resample{i}); % Approximate entropy
-    SaEn{i} = SampEn( dim, toll, HRV_resample{i}); %Sample Entropy
+    AppEn(1,i) = ApEn( dim, toll, HRV_resample{i}); % Approximate entropy
+    SaEn(1,i) = SampEn( dim, toll, HRV_resample{i}); %Sample Entropy
 %    [D2, Cm, epsilon] = corrdim(HRV_resample{i},dim,tau,epsilon,sloperange); 
 %       m - embedding dimension
 %       tau - delay time lag
-   [Alpha1{i} Alpha2{i}]=DFA_main(HRV_resample{i}); % Detrended fluctuation analysis
+   [Alpha1(1,i) Alpha2(1,i)]=DFA_main(HRV_resample{i}); % Detrended fluctuation analysis
 end
 
 
@@ -207,9 +207,13 @@ end
 % EXPERIMENTAL STAGES. YOU HAVE THE OPTION TO ATTEMPT BAYESION
 % CLASSIFICATION OF THE RESULTS.
 
-%figure()
-%boxplot(HRV_resample{1}, HRV_resample{2}, HRV_resample{3}, ...
-%    HRV_resample{4}, HRV_resample{5});
+hrv_prep = [HRV_resample{1}; HRV_resample{2}; HRV_resample{3}; HRV_resample{4}; HRV_resample{5}];
+grp = [zeros(1,length(HRV_resample{1})), ones(1,length(HRV_resample{2})), ...
+    2*ones(1,length(HRV_resample{3})), 3*ones(1,length(HRV_resample{4})), ...
+    4*ones(1,length(HRV_resample{5}))];
+figure()
+boxplot(hrv_prep, grp);
+title('HRV for ')
 
 
 
