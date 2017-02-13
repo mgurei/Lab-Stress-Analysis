@@ -31,13 +31,14 @@ fs=512; % Sampling frequency
 % Example of QRS detection 
 load s_b_coeff.mat; % See desc_filt variable for filter parameters
 load s_ecg_10_subjects.mat;
-ecg=ecg_data(1,~isnan(ecg_data(1,:)));
+subject = 1;
+ecg=ecg_data(subject,~isnan(ecg_data(subject,:)));
 
-Segment{1} = ecg(1:startPoint(1,1));
-Segment{2} = ecg(startPoint(1,1)+1:startPoint(1,2));
-Segment{3} = ecg(startPoint(1,2)+1:startPoint(1,3));
-Segment{4} = ecg(startPoint(1,3)+1:startPoint(1,4));
-Segment{5} = ecg(startPoint(1,4)+1:length(ecg));
+Segment{1} = ecg(1:startPoint(subject,1));
+Segment{2} = ecg(startPoint(subject,1)+1:startPoint(subject,2));
+Segment{3} = ecg(startPoint(subject,2)+1:startPoint(subject,3));
+Segment{4} = ecg(startPoint(subject,3)+1:startPoint(subject,4));
+Segment{5} = ecg(startPoint(subject,4)+1:length(ecg));
 
 % Old Algorithm
 % for i = 1:5
@@ -137,7 +138,7 @@ for i = 1:5
 NN_diff = diff(HRV_resample{i}); % difference between adjancent NN intervals    
 
 HRV_mean{i} = mean(HRV_resample{i}); %mean of HRV
-HRV_std{i} = std(HRV_resample{i});   %standard deviantion HRV
+NN_std{i} = std(HRV_resample{i});   %standard deviantion HRV
 NN_diff_rms{i} = rms(NN_diff);       %RMS of NN diff
 NN_diff_std{i} = std(NN_diff);       %standard deviation od NN diff
 NN50{i} = HRV_resample{i} (HRV_resample{i} < limit_50ms);   %NN less the 50ms
