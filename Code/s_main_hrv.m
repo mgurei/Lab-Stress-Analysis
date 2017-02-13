@@ -197,19 +197,20 @@ for i = 1:5
 %    [D2, Cm, epsilon] = corrdim(HRV_resample{i},dim,tau,epsilon,sloperange); 
 %       m - embedding dimension
 %       tau - delay time lag
-
    [Alpha1{i} Alpha2{i}]=DFA_main(HRV_resample{i}); % Detrended fluctuation analysis
-% DATA should be a time series of length(DATA) greater than 2000,and of column vector.
-%   A is the alpha in the paper
-%   D is the dimension of the time series
-%   n can be changed to your interest
-
 end
 
 
 %% Part 4: Present HRV results
 
-
 % TASK: PRESENT HRV PARAMETERS IN BOX AND WHISKER PLOTS BETWEEN THE FOUR
 % EXPERIMENTAL STAGES. YOU HAVE THE OPTION TO ATTEMPT BAYESION
 % CLASSIFICATION OF THE RESULTS.
+
+figure()
+boxplot(HRV_resample{1}, HRV_resample{2}, HRV_resample{3}, ...
+    HRV_resample{4}, HRV_resample{5});
+
+
+
+
