@@ -9,7 +9,7 @@ F_n=zeros(N1,1);
  for i=1:N1
      F_n(i)=DFA(DATA,n(i),1);
  end
- plot(log10(n),log10(F_n),'*')
+ % plot(log10(n),log10(F_n),'*')
  n=n';
 %  plot(log(n),log(F_n));
 % xlabel('n')

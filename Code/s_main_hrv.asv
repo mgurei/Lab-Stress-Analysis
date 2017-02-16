@@ -19,7 +19,7 @@ startPoint=[15576+10*60*512 15576+(10+8)*60*512 15576+(10+8+6)*60*512 15576+(10+
         8821+10*60*512 8821+(10+7)*60*512 8821+(10+7+6)*60*512 8821+(10+7+6+6)*60*512;
         40000+10*60*512 40000+(10+7.25)*60*512 40000+(10+7.25+6)*60*512 40000+(10+7.25+6+6)*60*512];
 % Names of four experimental stages
-classes={'normal activity';'negative';'mental task';'neutral';'baseline'};
+classes={'Normal activity';'Negative';'Mental task';'Neutral';'Baseline'};
 % Names of files with ECG data from 10 subjects
 names={'sub1_29_05_2013'; 'sub2_29_05_2013'; 'sub3_29_05_2013'; 
         'sub4_29_05_2013'; 'sub5_29_05_2013'; 'sub6_29_05_2013';
@@ -31,177 +31,205 @@ fs=512; % Sampling frequency
 % Example of QRS detection 
 load s_b_coeff.mat; % See desc_filt variable for filter parameters
 load s_ecg_10_subjects.mat;
-subject = 1;
-ecg=ecg_data(subject,~isnan(ecg_data(subject,:)));
 
-Segment{1} = ecg(1:startPoint(subject,1));
-Segment{2} = ecg(startPoint(subject,1)+1:startPoint(subject,2));
-Segment{3} = ecg(startPoint(subject,2)+1:startPoint(subject,3));
-Segment{4} = ecg(startPoint(subject,3)+1:startPoint(subject,4));
-Segment{5} = ecg(startPoint(subject,4)+1:length(ecg));
+for j=1:10
+    %% TEST
+    subject = j;
+    ecg=ecg_data(subject,~isnan(ecg_data(subject,:)));
 
-% Old Algorithm
-% for i = 1:5
-%     qrs{i} = s_detect_qrs(Segment{i},b_low,b_high,b_avg,delay);
-%     qrs{i} = s_detect_filtering(Segment{i},qrs{i});
-% end
+    Segment{1} = ecg(1:startPoint(subject,1));
+    Segment{2} = ecg(startPoint(subject,1)+1:startPoint(subject,2));
+    Segment{3} = ecg(startPoint(subject,2)+1:startPoint(subject,3));
+    Segment{4} = ecg(startPoint(subject,3)+1:startPoint(subject,4));
+    Segment{5} = ecg(startPoint(subject,4)+1:length(ecg));
 
-% New Algorithm
-for i=1:5
-    [qrs_amp_raw,qrsi{i},delay]=pan_tompkin(Segment{i},fs,0);
-    numNN{i} = length(qrsi{i});
-    qrs{i} = transforMat(qrsi{i},length(Segment{i}));
+    % Old Algorithm
+%     for i = 1:5
+%         qrs{i} = s_detect_qrs(Segment{i},b_low,b_high,b_avg,delay);
+%         qrs{i} = s_detect_filtering(Segment{i},qrs{i});
+%     end
+
+    % New Algorithm
+    for i=1:5
+        [qrs_amp_raw,qrsi{i},delay]=pan_tompkin(Segment{i},fs,0);
+        numNN{i} = length(qrsi{i});
+        qrs{i} = transforMat(qrsi{i},length(Segment{i}));
+    end
+
+    figure;
+    plot(1:length(qrs{1}),5000*qrs{1},1:length(ecg),ecg);
+    line([startPoint(1,1),startPoint(1,1)],[0,5000],'LineWidth',1,'Color','Green');
+    line([startPoint(1,2),startPoint(1,2)],[0,5000],'LineWidth',1,'Color','Green');
+    line([startPoint(1,3),startPoint(1,3)],[0,5000],'LineWidth',1,'Color','Green');
+    line([startPoint(1,4),startPoint(1,4)],[0,5000],'LineWidth',1,'Color','Green');
+    % 
+    % title('ECG with detected QRS')
+    % 
+    % % TASK: SEGMENT ECG APPROPRIATELY AND FIND QRS FOR EACH INDIVIDUAL SEGMENT
+    % % ECG SHOULD BE SEGMENTED ACCORDING TO THE EXPERIMENTAL STAGES
+    % 
+    %% Part 2: Calculating HRV
+    % Her the Heart Rate Variability (HRV) is calculated from the know QRS
+    % position. The HRV is resampled at 8 Hz to have a uniform time axis.
+    f_resample=8;
+
+    % HRV and HRV resampled calculation
+    HRV_resample = cell(1,length(classes));
+    qrs_loc_time_resample = cell(1,length(classes));
+    for i = 1:5
+    [~, ~, HRV_resample{i}, qrs_loc_time_resample{i}] = s_get_HRV(qrs{i}, f_resample, fs);
+        HRV_resample{i}(isnan(HRV_resample{i})) = [];
+    end
+
+    % % Plotting HRV
+    % figure;
+    % plot(qrs_loc_time(2:end), HRV);
+    % title('HRV tachogram');
+    % xlabel('Time of RR (seconds)')
+    % xlabel('RR interval (seconds)');
+    % 
+    % % Plotting HRV resampled
+    % figure;
+    % plot(qrs_loc_time_resample, HRV_resample);
+    % title('HRV resampled tachogram');
+    % xlabel('Time of RR (seconds)')
+    % xlabel('RR interval (seconds)');
+
+    % THIS FOURIER TRANSFORM WILL ONLY WORK WHEN THE APPROPRIATE CHANGES WERE
+    % MADE TO THE s_get_HRV function FOR THE HRV_resample and
+    % qrs_loc_time_resample
+    HRV_psd = cell(1,length(classes));
+    freq_axis = cell(1,length(classes));
+
+%     figure; hold on
+    for i = 1:5
+    temp=HRV_resample{i}(~isnan(HRV_resample{i}));
+    HRV_psd{i}=abs((fftshift(fft(temp)).^2)/length(temp)); %PSD (s^2/Hz) estimation
+    freq_axis{i}=-f_resample/2:f_resample/(length(HRV_psd{i})):...
+            (f_resample/2-f_resample/(length(HRV_psd{i})));
+%     plot(freq_axis{i},HRV_psd{i});
+    end
+
+
+%     legend(classes);    
+%     title('Power Spectra distribution')
+%     xlabel('Frequency (Hz)'); ylabel('PSD (s^2/Hz)');
+%     axis([0,0.4,0,20]);
+%     hold off
+
+    %% Part 3: Extracting HRV Parameters
+    % Here time, frequency and non-linear features of the HRV signal are
+    % calculated. 
+
+    % Time Domain Parameters
+    % mean
+    % standard deviation of NN intervals
+    % RMS of difference between adjacent NN intervals
+    % STD of difference between adjacent NN intervals
+    % NN50 - number of NN intervals that differ by less than 50 ms
+    % pNN50 - percentage of NN intervals that differ by less than 50 ms from
+    % all NN intervals
+    limit_50ms = 0.05;
+    NN_mean = zeros(1,length(classes));
+    NN_std = zeros(1,length(classes));
+    NN_diff_rms = zeros(1,length(classes));
+    NN_diff_std = zeros(1,length(classes));
+    NN50 = zeros(1,length(classes));
+    pNN50 = zeros(1,length(classes));
+
+    for i = 1:5
+    NN_diff = diff(HRV_resample{i}); % difference between adjancent NN intervals    
+
+    NN_mean(1,i) = mean(HRV_resample{i}); %mean of HRV
+    NN_std(1,i) = std(HRV_resample{i});   %standard deviantion HRV
+    NN_diff_rms(1,i) = rms(NN_diff);       %RMS of NN diff
+    NN_diff_std(1,i) = std(NN_diff);       %standard deviation od NN diff
+    if ~isempty(HRV_resample{i} (HRV_resample{i} < limit_50ms))
+          NN50(1,i) = HRV_resample{i} (HRV_resample{i} < limit_50ms);   %NN less the 50ms
+          pNN50(1,i) = 100* NN50{i}/ numNN{i};   % percentage NN50 in all HRV
+    end
+    end
+
+    % Frequency Domain Parameters
+    % Total HRV Positive frequency range
+    % VLF - HRV from 0.00 to 0.04
+    % LF - HRV from 0.05 to 0.15 Hz (normalize)
+    % HF - HRV from 0.16 to 0.40 Hz (normalize)
+    % Ratio of LF to HF
+    tot_band_power = zeros(1,length(classes));
+    VLF_band_power = zeros(1,length(classes));
+    LF_band_power = zeros(1,length(classes));
+    HF_band_power = zeros(1,length(classes));
+    ratioLH = zeros(1,length(classes));
+    pVLF = zeros(1,length(classes));
+    pLF = zeros(1,length(classes));
+    pHF = zeros(1,length(classes));
+
+    for i = 1:5
+    % frenquency used
+    tot_range = find(freq_axis{i}>=0.00 & freq_axis{i}<f_resample/2);
+    VLF_range = find(freq_axis{i}>=0.00 & freq_axis{i}<=0.04);
+    LF_range = find(freq_axis{i}>=0.05 & freq_axis{i}<=0.15);
+    HF_range = find(freq_axis{i}>=0.16 & freq_axis{i}<=0.4);
+
+    %calculations
+    tot_band_power(1,i) = (HRV_psd{i}(tot_range)'*HRV_psd{i}(tot_range) )/ (length(tot_range));
+    VLF_band_power(1,i) = (HRV_psd{i}(VLF_range)'*HRV_psd{i}(VLF_range) )/ (length(VLF_range));
+    LF_band_power(1,i) = (HRV_psd{i}(LF_range)'*HRV_psd{i}(LF_range) )/ (length(LF_range));
+    HF_band_power(1,i) = (HRV_psd{i}(HF_range)'*HRV_psd{i}(HF_range) )/ (length(HF_range));
+    ratioLH(1,i) = LF_band_power(1,i)/HF_band_power(1,i);
+    % percentage of the bands compared to the total
+    pVLF(1,i) = VLF_band_power(1,i)/tot_band_power(1,i) * 100;
+    pLF(1,i) = LF_band_power(1,i)/tot_band_power(1,i) * 100;
+    pHF(1,i) = HF_band_power(1,i)/tot_band_power(1,i) * 100;
+
+    end
+
+    % Non-linear parameters calculated here are:
+    % -AppEn = approximate entropy
+    % -SaEn = sample entropy 
+    % -
+    % - 
+    dim = 2; % embedded dimension
+    tau = 0.1; %delay time lag
+    AppEn = zeros(1,length(classes));
+    SaEn = zeros(1,length(classes));
+
+    for i = 1:5  
+        toll = .2 * NN_std(1,i); %tollerance 
+        AppEn(1,i) = ApEn( dim, toll, HRV_resample{i}); % Approximate entropy
+        SaEn(1,i) = SampEn( dim, toll, HRV_resample{i}); %Sample Entropy
+    %    [D2, Cm, epsilon] = corrdim(HRV_resample{i},dim,tau,epsilon,sloperange); 
+    %       m - embedding dimension
+    %       tau - delay time lag
+       [Alpha1(1,i) Alpha2(1,i)]=DFA_main(HRV_resample{i}); % Detrended fluctuation analysis
+    end
+    
+    
+    
+    allNN_diff_rms(j,:) = NN_diff_rms;
+    allNN_diff_std(j,:) = NN_diff_std;
+    allNN_mean(j,:) = NN_mean;
+    allNN_std(j,:) = NN_std;
+    allNN50(j,:) = NN50;
+    allpNN50(j,:) = pNN50;
+    alltot_band_power(j,:) = tot_band_power;
+    allVLF_band_power(j,:) = VLF_band_power;
+    allLF_band_power(j,:) = LF_band_power;
+    allHF_band_power(j,:) = HF_band_power;
+    allratioLH(j,:) = ratioLH;
+    allpVLF(j,:) = pVLF;
+    allpLF(j,:) = pLF;
+    allpHF(j,:) = pHF;
+    allAppEn(j,:) = AppEn;
+    allSaEn(j,:) = SaEn;
+    allAlpha1(j,:) = Alpha1;
+    allAlpha2(j,:) = Alpha2;
+    
+    j
+    
+    
 end
-
-% figure;
-% plot(1:length(qrs{1}),5000*qrs{1},1:length(Segment{1}),Segment{1});
-% line([startPoint(1,1),startPoint(1,1)],[0,5000],'LineWidth',1,'Color','Green');
-% line([startPoint(1,2),startPoint(1,2)],[0,5000],'LineWidth',1,'Color','Green');
-% line([startPoint(1,3),startPoint(1,3)],[0,5000],'LineWidth',1,'Color','Green');
-% line([startPoint(1,4),startPoint(1,4)],[0,5000],'LineWidth',1,'Color','Green');
-% 
-% title('ECG with detected QRS')
-% 
-% % TASK: SEGMENT ECG APPROPRIATELY AND FIND QRS FOR EACH INDIVIDUAL SEGMENT
-% % ECG SHOULD BE SEGMENTED ACCORDING TO THE EXPERIMENTAL STAGES
-% 
-%% Part 2: Calculating HRV
-% Her the Heart Rate Variability (HRV) is calculated from the know QRS
-% position. The HRV is resampled at 8 Hz to have a uniform time axis.
-f_resample=8;
-
-% HRV and HRV resampled calculation
-HRV_resample = cell(1,length(classes));
-qrs_loc_time_resample = cell(1,length(classes));
-for i = 1:5
-[~, ~, HRV_resample{i}, qrs_loc_time_resample{i}] = s_get_HRV(qrs{i}, f_resample, fs);
-    HRV_resample{i}(isnan(HRV_resample{i})) = [];
-end
-
-% % Plotting HRV
-% figure;
-% plot(qrs_loc_time(2:end), HRV);
-% title('HRV tachogram');
-% xlabel('Time of RR (seconds)')
-% xlabel('RR interval (seconds)');
-% 
-% % Plotting HRV resampled
-% figure;
-% plot(qrs_loc_time_resample, HRV_resample);
-% title('HRV resampled tachogram');
-% xlabel('Time of RR (seconds)')
-% xlabel('RR interval (seconds)');
-
-% THIS FOURIER TRANSFORM WILL ONLY WORK WHEN THE APPROPRIATE CHANGES WERE
-% MADE TO THE s_get_HRV function FOR THE HRV_resample and
-% qrs_loc_time_resample
-HRV_psd = cell(1,length(classes));
-freq_axis = cell(1,length(classes));
-
-figure; hold on
-for i = 1:5
-temp=HRV_resample{i}(~isnan(HRV_resample{i}));
-HRV_psd{i}=abs((fftshift(fft(temp)).^2)/length(temp)); %PSD (s^2/Hz) estimation
-freq_axis{i}=-f_resample/2:f_resample/(length(HRV_psd{i})):...
-        (f_resample/2-f_resample/(length(HRV_psd{i})));
-plot(freq_axis{i},HRV_psd{i});
-end
-
-
-legend(classes);    
-title('Power Spectra distribution')
-xlabel('Frequency (Hz)'); ylabel('PSD (s^2/Hz)');
-axis([0,0.4,0,20]);
-hold off
-
-%% Part 3: Extracting HRV Parameters
-% Here time, frequency and non-linear features of the HRV signal are
-% calculated. 
-
-% Time Domain Parameters
-% mean
-% standard deviation of NN intervals
-% RMS of difference between adjacent NN intervals
-% STD of difference between adjacent NN intervals
-% NN50 - number of NN intervals that differ by less than 50 ms
-% pNN50 - percentage of NN intervals that differ by less than 50 ms from
-% all NN intervals
-limit_50ms = 0.05;
-NN_mean = zeros(1,length(classes));
-NN_std = zeros(1,length(classes));
-NN_diff_rms = zeros(1,length(classes));
-NN_diff_std = zeros(1,length(classes));
-NN50 = zeros(1,length(classes));
-pNN50 = zeros(1,length(classes));
-
-for i = 1:5
-NN_diff = diff(HRV_resample{i}); % difference between adjancent NN intervals    
-
-NN_mean(1,i) = mean(HRV_resample{i}); %mean of HRV
-NN_std(1,i) = std(HRV_resample{i});   %standard deviantion HRV
-NN_diff_rms(1,i) = rms(NN_diff);       %RMS of NN diff
-NN_diff_std(1,i) = std(NN_diff);       %standard deviation od NN diff
-if ~isempty(HRV_resample{i} (HRV_resample{i} < limit_50ms))
-      NN50(1,i) = HRV_resample{i} (HRV_resample{i} < limit_50ms);   %NN less the 50ms
-    pNN50(1,i) = 100* NN50{i}/ numNN{i};   % percentage NN50 in all HRV
-end
-end
-
-% Frequency Domain Parameters
-% Total HRV Positive frequency range
-% VLF - HRV from 0.00 to 0.04
-% LF - HRV from 0.05 to 0.15 Hz (normalize)
-% HF - HRV from 0.16 to 0.40 Hz (normalize)
-% Ratio of LF to HF
-tot_band_power = zeros(1,length(classes));
-VLF_band_power = zeros(1,length(classes));
-LF_band_power = zeros(1,length(classes));
-HF_band_power = zeros(1,length(classes));
-ratioLH = zeros(1,length(classes));
-pVLF = zeros(1,length(classes));
-pLF = zeros(1,length(classes));
-pHF = zeros(1,length(classes));
-
-for i = 1:5
-% frenquency used
-tot_range = find(freq_axis{i}>=0.00 & freq_axis{i}<f_resample/2);
-VLF_range = find(freq_axis{i}>=0.00 & freq_axis{i}<=0.04);
-LF_range = find(freq_axis{i}>=0.05 & freq_axis{i}<=0.15);
-HF_range = find(freq_axis{i}>=0.16 & freq_axis{i}<=0.4);
-
-%calculations
-tot_band_power(1,i) = (HRV_psd{i}(tot_range)'*HRV_psd{i}(tot_range) )/ (length(tot_range));
-VLF_band_power(1,i) = (HRV_psd{i}(VLF_range)'*HRV_psd{i}(VLF_range) )/ (length(VLF_range));
-LF_band_power(1,i) = (HRV_psd{i}(LF_range)'*HRV_psd{i}(LF_range) )/ (length(LF_range));
-HF_band_power(1,i) = (HRV_psd{i}(HF_range)'*HRV_psd{i}(HF_range) )/ (length(HF_range));
-ratioLH{i} = LF_band_power{i}/HF_band_power{i};
-% percentage of the bands compared to the total
-pVLF{i} = VLF_band_power(1,i)/tot_band_power{i} * 100;
-pLF{i} = LF_band_power(1,i)/tot_band_power{i} * 100;
-pHF{i} = HF_band_power(1,i)/tot_band_power{i} * 100;
-
-end
-
-% Non-linear parameters calculated here are:
-% -AppEn = approximate entropy
-% -SaEn = sample entropy 
-% -
-% - 
-dim = 2; % embedded dimension
-tau = 0.1; %delay time lag
-AppEn = zeros(1,length(classes));
-SaEn = zeros(1,length(classes));
-
-for i = 1:5  
-    toll = .2 * NN_std{i}; %tollerance 
-    AppEn(1,i) = ApEn( dim, toll, HRV_resample{i}); % Approximate entropy
-    SaEn(1,i) = SampEn( dim, toll, HRV_resample{i}); %Sample Entropy
-%    [D2, Cm, epsilon] = corrdim(HRV_resample{i},dim,tau,epsilon,sloperange); 
-%       m - embedding dimension
-%       tau - delay time lag
-   [Alpha1(1,i) Alpha2(1,i)]=DFA_main(HRV_resample{i}); % Detrended fluctuation analysis
-end
-
 
 %% Part 4: Present HRV results
 
@@ -209,14 +237,89 @@ end
 % EXPERIMENTAL STAGES. YOU HAVE THE OPTION TO ATTEMPT BAYESION
 % CLASSIFICATION OF THE RESULTS.
 
-hrv_prep = [HRV_resample{1}; HRV_resample{2}; HRV_resample{3}; HRV_resample{4}; HRV_resample{5}];
-grp = [zeros(1,length(HRV_resample{1})), ones(1,length(HRV_resample{2})), ...
-    2*ones(1,length(HRV_resample{3})), 3*ones(1,length(HRV_resample{4})), ...
-    4*ones(1,length(HRV_resample{5}))];
-figure()
-boxplot(hrv_prep, grp);
-title('HRV for ')
+% hrv_prep = [HRV_resample{1}; HRV_resample{2}; HRV_resample{3}; HRV_resample{4}; HRV_resample{5}];
+% grp = [zeros(1,length(HRV_resample{1})), ones(1,length(HRV_resample{2})), ...
+%     2*ones(1,length(HRV_resample{3})), 3*ones(1,length(HRV_resample{4})), ...
+%     4*ones(1,length(HRV_resample{5}))];
+% figure()
+% boxplot(hrv_prep, grp, 'Labels', classes);
+% title('HRV for all segment')
 
+% -- Time domain parameters --
 
+figure;
+subplot(6,1,1);
+boxplot(allNN_diff_rms,'Labels',classes)
+title('NN Diff RMS')
 
+subplot(6,1,2);
+boxplot(allNN_diff_std,'Labels',classes)
+title('NN Diff STD')
+
+subplot(6,1,3);
+boxplot(allNN_mean,'Labels',classes)
+title('NN Mean')
+
+subplot(6,1,4);
+boxplot(allNN_std,'Labels',classes)
+title('NN Mean')
+
+subplot(6,1,5);
+boxplot(allNN50,'Labels',classes)
+title('NN50')
+
+subplot(6,1,6);
+boxplot(allpNN50,'Labels',classes)
+title('pNN50')
+
+% -- Frequency domain parameters -- 
+
+figure;
+subplot(4,1,1)
+boxplot(alltot_band_power,'Labels',classes)
+title('Total band power')
+
+subplot(4,1,2)
+boxplot(allVLF_band_power,'Labels',classes)
+title('VLF band power')
+
+subplot(4,1,3)
+boxplot(allLF_band_power,'Labels',classes)
+title('LF band power')
+
+subplot(4,1,4)
+boxplot(allHF_band_power,'Labels',classes)
+title('HF band power')
+
+figure;
+subplot(4,1,1)
+boxplot(allratioLH,'Labels',classes)
+title('Ratio LF HF')
+
+subplot(4,1,2)
+boxplot(allpVLF,'Labels',classes)
+title('Percentage VLF')
+
+subplot(4,1,3)
+boxplot(allpLF,'Labels',classes)
+title('Percentage LF')
+
+subplot(4,1,4)
+boxplot(allpHF,'Labels',classes)
+title('Percentage HF')
+
+% -- Nonlinear domain parameters --
+
+figure;
+subplot(4,1,1)
+boxplot(allAppEn,'Labels',classes)
+title('Approximate Entropy')
+
+subplot(4,1,2)
+boxplot(allSaEn,'Labels',classes)
+title('Sample Entropy')
+
+subplot(4,1,3)
+boxplot(allAlpha1
+allAlpha2
 
