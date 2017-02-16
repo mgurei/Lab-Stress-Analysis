@@ -32,11 +32,35 @@ fs=512; % Sampling frequency
 load s_b_coeff.mat; % See desc_filt variable for filter parameters
 load s_ecg_10_subjects.mat;
 
+%%     init variables
+allNN_diff_rms = zeros(10,4);
+allNN_diff_std = zeros(10,4);
+allNN_mean = zeros(10,4);
+allNN_std = zeros(10,4);
+allNN50 = zeros(10,4);
+allpNN50 = zeros(10,4);
+alltot_band_power = zeros(10,4);
+allVLF_band_power = zeros(10,4);
+allLF_band_power = zeros(10,4);
+allHF_band_power = zeros(10,4);
+allratioLH = zeros(10,4);
+allpVLF = zeros(10,4);
+allpLF = zeros(10,4);
+allpHF = zeros(10,4);
+allAppEn = zeros(10,4);
+allSaEn = zeros(10,4);
+allAlpha1 = zeros(10,4);
+allAlpha2 = zeros(10,4);
+
+
 for j=1:10
     %% TEST
     subject = j;
     ecg=ecg_data(subject,~isnan(ecg_data(subject,:)));
-
+    
+    s = 10; %seconds of new segment to ignore
+    ignore = s*fs;%numbers of samples in a new segment to ignore 
+    
     Segment{1} = ecg(1:startPoint(subject,1));
     Segment{2} = ecg(startPoint(subject,1)+1:startPoint(subject,2));
     Segment{3} = ecg(startPoint(subject,2)+1:startPoint(subject,3));
@@ -44,29 +68,29 @@ for j=1:10
     Segment{5} = ecg(startPoint(subject,4)+1:length(ecg));
 
     % Old Algorithm
-    for i = 1:5
-        qrs{i} = s_detect_qrs(Segment{i},b_low,b_high,b_avg,delay);
-        qrs{i} = s_detect_filtering(Segment{i},qrs{i});
-    end
-
-    % New Algorithm
-%     for i=1:5
-%         [qrs_amp_raw,qrsi{i},delay]=pan_tompkin(Segment{i},fs,0);
-%         numNN{i} = length(qrsi{i});
-%         qrs{i} = transforMat(qrsi{i},length(Segment{i}));
+%     for i = 1:5
+%         qrs{i} = s_detect_qrs(Segment{i},b_low,b_high,b_avg,delay);
+%         qrs{i} = s_detect_filtering(Segment{i},qrs{i});
 %     end
 
-    figure;hold on;
-    plot(1:length(qrs{1}),5000*qrs{1},'r');
-    plot(startPoint(j,1)+(1:length(qrs{2})),5000*qrs{2},'r');
-    plot(startPoint(j,2)+(1:length(qrs{3})),5000*qrs{3},'r');
-    plot(startPoint(j,3)+(1:length(qrs{4})),5000*qrs{4},'r');
-    plot(startPoint(j,4)+(1:length(qrs{5})),5000*qrs{5},'r');
-    plot(1:length(ecg),ecg);
-    line([startPoint(j,1),startPoint(j,1)],[0,5000],'LineWidth',1,'Color','Green');
-    line([startPoint(j,2),startPoint(j,2)],[0,5000],'LineWidth',1,'Color','Green');
-    line([startPoint(j,3),startPoint(j,3)],[0,5000],'LineWidth',1,'Color','Green');
-    line([startPoint(j,4),startPoint(j,4)],[0,5000],'LineWidth',1,'Color','Green');
+    % New Algorithm
+    for i=1:5       
+        [qrs_amp_raw,qrsi{i},delay]=pan_tompkin(Segment{i},fs,0);
+        numNN{i} = length(qrsi{i});
+        qrs{i} = transforMat(qrsi{i},length(Segment{i}));
+    end
+
+%     figure;hold on;
+%     plot((1:length(qrs{1})),5000*qrs{1},'r');
+%     plot(startPoint(j,1)+(1:length(qrs{2}))+1,5000*qrs{2},'r');
+%     plot(startPoint(j,2)+(1:length(qrs{3}))+1,5000*qrs{3},'r');
+%     plot(startPoint(j,3)+(1:length(qrs{4}))+1,5000*qrs{4},'r');
+%     plot(startPoint(j,4)+(1:length(qrs{5}))+1,5000*qrs{5},'r');
+%     plot(1:length(ecg),ecg);
+%     line([startPoint(j,1),startPoint(j,1)],[0,5000],'LineWidth',1,'Color','Green');
+%     line([startPoint(j,2),startPoint(j,2)],[0,5000],'LineWidth',1,'Color','Green');
+%     line([startPoint(j,3),startPoint(j,3)],[0,5000],'LineWidth',1,'Color','Green');
+%     line([startPoint(j,4),startPoint(j,4)],[0,5000],'LineWidth',1,'Color','Green');
     % 
     % title('ECG with detected QRS')
     % 
@@ -207,32 +231,34 @@ for j=1:10
     %    [D2, Cm, epsilon] = corrdim(HRV_resample{i},dim,tau,epsilon,sloperange); 
     %       m - embedding dimension
     %       tau - delay time lag
-       [Alpha1(1,i) Alpha2(1,i)]=DFA_main(HRV_resample{i}); % Detrended fluctuation analysis
+       [Alpha1(1,i), Alpha2(1,i)]=DFA_main(HRV_resample{i}); % Detrended fluctuation analysis
     end
     
+
     
     
-    allNN_diff_rms(j,:) = NN_diff_rms;
-    allNN_diff_std(j,:) = NN_diff_std;
-    allNN_mean(j,:) = NN_mean;
-    allNN_std(j,:) = NN_std;
-    allNN50(j,:) = NN50;
-    allpNN50(j,:) = pNN50;
-    alltot_band_power(j,:) = tot_band_power;
-    allVLF_band_power(j,:) = VLF_band_power;
-    allLF_band_power(j,:) = LF_band_power;
-    allHF_band_power(j,:) = HF_band_power;
-    allratioLH(j,:) = ratioLH;
-    allpVLF(j,:) = pVLF;
-    allpLF(j,:) = pLF;
-    allpHF(j,:) = pHF;
-    allAppEn(j,:) = AppEn;
-    allSaEn(j,:) = SaEn;
-    allAlpha1(j,:) = Alpha1;
-    allAlpha2(j,:) = Alpha2;
+    %% Adding to full variables
+    allNN_diff_rms(j,:) = NN_diff_rms(2:5);
+    allNN_diff_std(j,:) = NN_diff_std(2:5);
+    allNN_mean(j,:) = NN_mean(2:5);
+    allNN_std(j,:) = NN_std(2:5);
+    allNN50(j,:) = NN50(2:5);
+    allpNN50(j,:) = pNN50(2:5);
+    alltot_band_power(j,:) = tot_band_power(2:5);
+    allVLF_band_power(j,:) = VLF_band_power(2:5);
+    allLF_band_power(j,:) = LF_band_power(2:5);
+    allHF_band_power(j,:) = HF_band_power(2:5);
+    allratioLH(j,:) = ratioLH(2:5);
+    allpVLF(j,:) = pVLF(2:5);
+    allpLF(j,:) = pLF(2:5);
+    allpHF(j,:) = pHF(2:5);
+    allAppEn(j,:) = AppEn(2:5);
+    allSaEn(j,:) = SaEn(2:5);
+    allAlpha1(j,:) = Alpha1(2:5);
+    allAlpha2(j,:) = Alpha2(2:5);
+    
     
     j
-    
     
 end
 
@@ -251,7 +277,7 @@ end
 % title('HRV for all segment')
 
 % -- Time domain parameters --
-
+classes = {'Negative';'Mental task';'Neutral';'Baseline'};
 figure;
 subplot(6,1,1);
 boxplot(allNN_diff_rms,'Labels',classes)
