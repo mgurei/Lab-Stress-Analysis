@@ -53,7 +53,7 @@ allAlpha1 = zeros(10,4);
 allAlpha2 = zeros(10,4);
 
 
-for j=1:10
+for j=1:1
     %% TEST
     subject = j;
     ecg=ecg_data(subject,~isnan(ecg_data(subject,:)));
@@ -173,10 +173,10 @@ for j=1:10
     NN_std(1,i) = std(HRV_resample{i});   %standard deviantion HRV
     NN_diff_rms(1,i) = rms(NN_diff);       %RMS of NN diff
     NN_diff_std(1,i) = std(NN_diff);       %standard deviation od NN diff
-    if ~isempty(HRV_resample{i} (HRV_resample{i} < limit_50ms))
-          NN50(1,i) = HRV_resample{i} (HRV_resample{i} < limit_50ms);   %NN less the 50ms
-          pNN50(1,i) = 100* NN50{i}/ numNN{i};   % percentage NN50 in all HRV
-    end
+    %if ~isempty(HRV_resample{i} (HRV_resample{i} < limit_50ms))
+    NN50(1,i) = numel(NN_diff (abs(NN_diff) > limit_50ms));   %adjancent NN differening  more than 50ms
+    pNN50(1,i) = 100* NN50(1,i)/ length(NN_diff);   % percentage NN50 in all HRV
+    %end
     end
 
     % Frequency Domain Parameters
@@ -196,16 +196,16 @@ for j=1:10
 
     for i = 1:5
     % frenquency used
-    tot_range = find(freq_axis{i}>=0.00 & freq_axis{i}<f_resample/2);
-    VLF_range = find(freq_axis{i}>=0.00 & freq_axis{i}<=0.04);
-    LF_range = find(freq_axis{i}>=0.05 & freq_axis{i}<=0.15);
-    HF_range = find(freq_axis{i}>=0.16 & freq_axis{i}<=0.4);
+    tot_range = [0.00, 3.99];
+    VLF_range = [0.00, 0.04];
+    LF_range = [0.05, 0.15];
+    HF_range = [0.16, 0.4];
 
     %calculations
-    tot_band_power(1,i) = (HRV_psd{i}(tot_range)'*HRV_psd{i}(tot_range) )/ (length(tot_range));
-    VLF_band_power(1,i) = (HRV_psd{i}(VLF_range)'*HRV_psd{i}(VLF_range) )/ (length(VLF_range));
-    LF_band_power(1,i) = (HRV_psd{i}(LF_range)'*HRV_psd{i}(LF_range) )/ (length(LF_range));
-    HF_band_power(1,i) = (HRV_psd{i}(HF_range)'*HRV_psd{i}(HF_range) )/ (length(HF_range));
+    tot_band_power(1,i) = bandpower(HRV_psd{i}, f_resample, tot_range);
+    VLF_band_power(1,i) = bandpower(HRV_psd{i}, f_resample, VLF_range);
+    LF_band_power(1,i) = bandpower(HRV_psd{i}, f_resample, LF_range);
+    HF_band_power(1,i) = bandpower(HRV_psd{i}, f_resample, HF_range);
     ratioLH(1,i) = LF_band_power(1,i)/HF_band_power(1,i);
     % percentage of the bands compared to the total
     pVLF(1,i) = VLF_band_power(1,i)/tot_band_power(1,i) * 100;
