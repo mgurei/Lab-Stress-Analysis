@@ -53,7 +53,7 @@ allAlpha1 = zeros(10,4);
 allAlpha2 = zeros(10,4);
 
 
-for j=1:1
+for j=1:10
     %% TEST
     subject = j;
     ecg=ecg_data(subject,~isnan(ecg_data(subject,:)));
