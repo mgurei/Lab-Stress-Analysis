@@ -60,7 +60,6 @@ NN_diff_rms = zeros(1,length(classes));
 NN_diff_std = zeros(1,length(classes));
 NN50 = zeros(1,length(classes));
 pNN50 = zeros(1,length(classes));
-tags = {'NN_mean' 'NN_std' 'NN_rms' 'NN_std' 'NN50' 'pNN50'};
 
 for i = 1:5
     NN_diff = diff(HRV_resample{i}); % difference between adjancent NN intervals
@@ -73,7 +72,7 @@ for i = 1:5
 end
 
 data_out.time = table(NN_mean', NN_std', NN_diff_rms', NN_diff_std', NN50', ...
-    pNN50', classes);
+    pNN50');
 
 % Frequency Domain Parameters
 % VLF_band_power - Total HRV Positive frequency range
@@ -96,7 +95,7 @@ ratioLH = zeros(1,length(classes));
 pVLF = zeros(1,length(classes));
 pLF = zeros(1,length(classes));
 pHF = zeros(1,length(classes));
-tags = {'tot_bandpower' 'VLF_bandpower' 'LF_bandpower' 'HF_bandpower' 'ratioLH'};
+
 
 for i = 1:5
     tot_band_power(1,i) = bandpower(HRV_psd{i}, f_resample, tot_range);
@@ -112,7 +111,7 @@ for i = 1:5
 end
 
 data_out.frequency = table(tot_band_power', VLF_band_power', LF_band_power', ...
-    HF_band_power', ratioLH', classes);
+    HF_band_power', ratioLH');
 
 % Non-linear parameters calculated here are:
 % -AppEn = approximate entropy
@@ -124,7 +123,7 @@ AppEn = zeros(1,length(classes));
 SaEn = zeros(1,length(classes));
 Alpha1 = zeros(1,length(classes));
 Alpha2 = zeros(1,length(classes));
-tags = {'App_En' 'Sa_En' 'alpha_1' 'alpha_2'};
+
 
 for i = 1:5
     toll = .2 * NN_std(1,i); %tollerance
@@ -136,5 +135,13 @@ for i = 1:5
     [Alpha1(1,i), Alpha2(1,i)]=DFA_main(HRV_resample{i}); % Detrended fluctuation analysis
 end
 
-data_out.nonlinear = table (AppEn', SaEn', Alpha1', Alpha2', classes);
+%standardization of the non-linear parameters:
+for i = 1:5
+    AppEn(1,i) = (AppEn(1,i)-mean(AppEn))/std(AppEn);
+    SaEn(1,i) = (SaEn(1,i)-mean(SaEn))/std(SaEn);
+    Alpha1(1,i) = (Alpha1(1,i)-mean(Alpha1))/std(Alpha1);
+    Alpha2(1,i) = (Alpha2(1,i)-mean(Alpha2))/std(Alpha2);
+end
+
+data_out.nonlinear = table (AppEn', SaEn', Alpha1', Alpha2');
 end
