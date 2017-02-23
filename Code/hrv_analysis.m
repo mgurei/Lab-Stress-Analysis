@@ -10,6 +10,10 @@ Segment{3} = ecg(startPoint(1,2)+1:startPoint(1,3));
 Segment{4} = ecg(startPoint(1,3)+1:startPoint(1,4));
 Segment{5} = ecg(startPoint(1,4)+1:length(ecg));
 
+% filtering out some noise
+Segment{1} = removeNoisyData(Segment{1});
+
+
 % Pan Tompkin's QRS algorithm detection
 for i=1:5
     [~,qrs_num{i},~] = pan_tompkin(Segment{i},fs,0);
@@ -118,7 +122,6 @@ data_out.frequency = table(tot_band_power', VLF_band_power', LF_band_power', ...
 % -SaEn = sample entropy
 
 dim = 2; % embedded dimension
-tau = 0.1; %delay time lag
 AppEn = zeros(1,length(classes));
 SaEn = zeros(1,length(classes));
 Alpha1 = zeros(1,length(classes));
@@ -129,9 +132,6 @@ for i = 1:5
     toll = .2 * NN_std(1,i); %tollerance
     AppEn(1,i) = ApEn( dim, toll, HRV_resample{i}); % Approximate entropy
     SaEn(1,i) = SampEn( dim, toll, HRV_resample{i}); %Sample Entropy
-    %    [D2, Cm, epsilon] = corrdim(HRV_resample{i},dim,tau,epsilon,sloperange);
-    %       m - embedding dimension
-    %       tau - delay time lag
     [Alpha1(1,i), Alpha2(1,i)]=DFA_main(HRV_resample{i}); % Detrended fluctuation analysis
 end
 
