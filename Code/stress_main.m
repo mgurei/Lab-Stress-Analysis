@@ -2,9 +2,6 @@
 %-----------------------Loading ECG Data----------------------------------%
 % Version: Mihai, Vegard, Romek
 % INCLUDE DESCRIPTION BEFORE HANDING IN
-%
-%
-%
 %-------------------------------------------------------------------------%
 
 %tidying up
@@ -39,7 +36,7 @@ Alpha2 = 0;
 class_vector = [];
 out = struct;
 
-for subjectID = 1:9
+for subjectID = 1:10
     ecg=ecg_data(subjectID,~isnan(ecg_data(subjectID,:)));
     out = hrv_analysis (ecg, fs, startPoint(subjectID,:), classes);
     
@@ -82,10 +79,10 @@ AppEn(1) = [];
 SaEn(1) = [];
 Alpha1(1) = [];
 Alpha2(1) = [];
-%
-feature_matrix = table(NN_mean, NN_std, NN_diff_rms, NN_diff_std, NN50, pNN50, ...
+%%
+feature_matrix = [NN_mean, NN_std, NN_diff_rms, NN_diff_std, NN50, pNN50, ...
     tot_band_power, VLF_band_power, LF_band_power, HF_band_power, ratioLH, ...
-    AppEn, SaEn, Alpha1, Alpha2, 'VariableNames', feature_names);
+    AppEn, SaEn, Alpha1, Alpha2];
 
 save ('feature_matrix.mat', 'feature_matrix')
 save ('class_vector.mat', 'class_vector')
@@ -95,5 +92,19 @@ save ('class_vector.mat', 'class_vector')
 load('feature_matrix.mat')
 load('class_vector.mat')
 
-gscatter(feature_matrix.NN_mean, feature_matrix.NN_std, class_vector,'rgb');
+cp = cvpartition(class_vector, 'KFold')
+
+%
+bayes_fit = fitcnb(feature_matrix(:,1:15), class_vector, 'DistributionNames',...
+    'kernel', 'Kernel','normal');
+fit_Class = resubPredict(bayes_fit);
+[ldaResubCM,grpOrder] = confusionmat(class_vector, fit_Class)
+fit_ResubErr = resubLoss(bayes_fit)
+fit_CV = crossval(bayes_fit, 'CVPartition',cp);
+fit_CVErr = kfoldLoss(fit_CV)
+
+
+
+
+
 
